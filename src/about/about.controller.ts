@@ -12,6 +12,8 @@ import { AboutService } from "./about.service";
 import { createAboutDto } from "./dto/create-about.dto";
 import { updateAboutDto } from "./dto/update-about.dto";
 import { FindOneParams } from "./dto/find-one-params";
+import { AboutResponseDto } from "./dto/about-response.dto";
+import { plainToInstance } from "class-transformer";
 
 @Controller("abouts")
 export class AboutController {
@@ -23,22 +25,30 @@ export class AboutController {
   // }
 
   @Get(":id")
-  async findOneById(@Param("id") id: string): Promise<About | null> {
-    return await this.aboutService.findOneById(id);
+  async findOneById(@Param("id") id: string): Promise<AboutResponseDto> {
+    const about = await this.findOneOrFail(id);
+    return plainToInstance(AboutResponseDto, about);
   }
 
   @Post()
-  async createAbout(@Body() createAboutDto: createAboutDto): Promise<About> {
-    return await this.aboutService.createAbout(createAboutDto);
+  async createAbout(
+    @Body() createAboutDto: createAboutDto,
+  ): Promise<AboutResponseDto> {
+    const about = await this.aboutService.createAbout(createAboutDto);
+    return plainToInstance(AboutResponseDto, about);
   }
 
   @Put(":id")
   async updateAboutById(
     @Param() params: FindOneParams,
     @Body() updateAboutDto: updateAboutDto,
-  ): Promise<About> {
+  ): Promise<AboutResponseDto> {
     const about = await this.findOneOrFail(params.id);
-    return await this.aboutService.updateAboutById(about, updateAboutDto);
+    const updated = await this.aboutService.updateAboutById(
+      about,
+      updateAboutDto,
+    );
+    return plainToInstance(AboutResponseDto, updated);
   }
 
   // @Delete(":id")
